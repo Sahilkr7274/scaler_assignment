@@ -1,0 +1,13 @@
+{
+  "name": "trello-clone",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "db:migrate": "cd backend && npx prisma migrate dev --name init",
+    "db:seed": "cd backend && node prisma/seed.js",
+    "db:generate": "cd backend && npx prisma generate"
+  }
+}
