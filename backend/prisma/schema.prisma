@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  avatar    String?
+  createdAt DateTime @default(now())
+
+  cardMembers CardMember[]
+}
+
+model Board {
+  id         String   @id @default(cuid())
+  title      String
+  background String   @default("#0079BF")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  lists List[]
+}
+
+model List {
+  id        String   @id @default(cuid())
+  title     String
+  position  Float
+  boardId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards Card[]
+}
+
+model Card {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  position    Float
+  listId      String
+  dueDate     DateTime?
+  archived    Boolean   @default(false)
+  cover       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  list        List          @relation(fields: [listId], references: [id], onDelete: Cascade)
+  labels      CardLabel[]
+  checklists  Checklist[]
+  members     CardMember[]
+  comments    Comment[]
+  activities  ActivityLog[]
+  attachments Attachment[]
+}
+
+model Label {
+  id    String @id @default(cuid())
+  name  String
+  color String
+
+  cards CardLabel[]
+}
+
+model CardLabel {
+  cardId  String
+  labelId String
+
+  card  Card  @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, labelId])
+}
+
+model Checklist {
+  id     String @id @default(cuid())
+  title  String
+  cardId String
+
+  card  Card            @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  items ChecklistItem[]
+}
+
+model ChecklistItem {
+  id          String  @id @default(cuid())
+  text        String
+  completed   Boolean @default(false)
+  checklistId String
+
+  checklist Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+}
+
+model CardMember {
+  cardId   String
+  memberId String
+
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, memberId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  cardId    String
+  author    String
+  createdAt DateTime @default(now())
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  cardId    String
+  actor     String
+  action    String
+  createdAt DateTime @default(now())
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  cardId    String
+  name      String
+  url       String
+  createdAt DateTime @default(now())
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+}
